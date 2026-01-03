@@ -1,0 +1,141 @@
+@import 'tailwindcss';
+@import 'uniwind';
+@import 'heroui-native/styles';
+/* Path to the heroui-native lib inside node_modules from the root of your project */
+@source './node_modules/heroui-native/lib';
+
+/* ============================================
+   Add missing --focus variable to default themes
+   ============================================ */
+
+@layer theme {
+  :root {
+    @variant light {
+      /* ========== BASE COLORS ========== */
+      --background: oklch(0.9702 0 0);
+      --foreground: oklch(0.2103 0.0059 285.89);
+
+      /* ========== SURFACE (cards, accordions, disclosure groups) ========== */
+      --surface: oklch(1 0 0);
+      --surface-foreground: oklch(0.2103 0.0059 285.89);
+
+      /* ========== OVERLAY (dialogs, popovers, modals, menus) ========== */
+      --overlay: oklch(1 0 0);
+      --overlay-foreground: oklch(0.2103 0.0059 285.89);
+
+      /* ========== MUTED TEXT ========== */
+      --muted: oklch(0.552 0.016 285.938);
+
+      /* ========== DEFAULT (neutral buttons/elements) ========== */
+      --default: oklch(0.94 0.001 286.375);
+      --default-foreground: oklch(0.2103 0.0059 285.89);
+
+      /* ========== ACCENT (primary action color) ========== */
+      --accent: oklch(0.6204 0.195 253.83);
+      --accent-foreground: oklch(0.9911 0 0);
+
+      /* ========== FORM FIELD DEFAULTS ========== */
+      --field-background: oklch(1 0 0);
+      --field-foreground: oklch(0.2103 0.0059 285.89);
+      --field-placeholder: oklch(0.552 0.016 285.938);
+      --field-border: transparent;
+
+      /* ========== STATUS COLORS ========== */
+      --success: oklch(0.7329 0.1935 150.81);
+      --success-foreground: oklch(0.2103 0.0059 285.89);
+
+      --warning: oklch(0.7819 0.1585 72.33);
+      --warning-foreground: oklch(0.2103 0.0059 285.89);
+
+      --danger: oklch(0.6532 0.2328 25.74);
+      --danger-foreground: oklch(0.9911 0 0);
+
+      /* ========== COMPONENT COLORS ========== */
+      --segment: oklch(1 0 0);
+      --segment-foreground: oklch(0.2103 0.0059 285.89);
+
+      /* ========== MISC COLORS ========== */
+      --border: oklch(0 0 0 / 0%);
+      --divider: oklch(0.72 0.004 286.32);
+      --link: oklch(0.2103 0.0059 285.89);
+      --focus: oklch(0.6204 0.195 253.83);
+    }
+
+    @variant dark {
+      /* ========== BASE COLORS ========== */
+      --background: oklch(0 0 0);
+      --foreground: oklch(0.9911 0 0);
+
+      /* ========== SURFACE (cards, accordions, disclosure groups) ========== */
+      --surface: oklch(0.2103 0.0059 285.89);
+      --surface-foreground: oklch(0.9911 0 0);
+
+      /* ========== OVERLAY (dialogs, popovers, modals, menus) ========== */
+      --overlay: oklch(0.2563 0.0058 271.19);
+      --overlay-foreground: oklch(0.9911 0 0);
+
+      /* ========== MUTED TEXT ========== */
+      --muted: oklch(0.705 0.015 286.067);
+
+      /* ========== DEFAULT (neutral buttons/elements) ========== */
+      --default: oklch(0.274 0.006 286.033);
+      --default-foreground: oklch(0.9911 0 0);
+
+      /* ========== ACCENT (primary action color) ========== */
+      --accent: oklch(0.6204 0.195 253.83); /* primary */
+      --accent-foreground: oklch(0.9911 0 0);
+
+      /* ========== FORM FIELD DEFAULTS ========== */
+      --field-background: oklch(0.274 0.006 286.033);
+      --field-foreground: oklch(0.9911 0 0);
+      --field-placeholder: oklch(0.705 0.015 286.067);
+      --field-border: transparent;
+
+      /* ========== STATUS COLORS ========== */
+      --success: oklch(0.7329 0.1935 150.81);
+      --success-foreground: oklch(0.2103 0.0059 285.89);
+
+      --warning: oklch(0.8203 0.1388 76.34);
+      --warning-foreground: oklch(0.2103 0.0059 285.89);
+
+      --danger: oklch(0.594 0.1967 24.63);
+      --danger-foreground: oklch(0.9911 0 0);
+
+      /* ========== COMPONENT COLORS ========== */
+      --segment: oklch(0.3964 0.01 285.93);
+      --segment-foreground: oklch(0.9911 0 0);
+
+      /* ========== MISC COLORS ========== */
+      --border: oklch(1 0 0 / 0%);
+      --divider: oklch(0.38 0.006 286.033);
+      --link: oklch(0.9911 0 0);
+      --focus: oklch(0.6204 0.195 253.83);
+    }
+  }
+}
+
+/* Remove the default focus outline and box-shadow from inputs */
+input:focus,
+input:focus-visible,
+.input:focus,
+.input:focus-visible,
+[data-slot="input"]:focus,
+[data-slot="input"]:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Make Chrome autofill transparent */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+[data-slot="input"]:-webkit-autofill,
+[data-slot="input"]:-webkit-autofill:hover,
+[data-slot="input"]:-webkit-autofill:focus,
+[data-slot="input"]:-webkit-autofill:active {
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: var(--foreground) !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+  box-shadow: none !important;
+}

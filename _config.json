@@ -1,0 +1,61 @@
+{
+  "name": "Firebase + Expo + HeroUI Native MultiTenant Starter",
+  "description": "A fast way to begin creating multitenant apps with access level client hooks, backend hook, and capibility and roles based access controls for data with dynamic tenants & roles and caps.",
+  "links": {
+    "terms": "https://www.google.com",
+    "privacy": "https://www.google.com"
+  },
+  "branding": {
+    "logo": "./assets/images/icon.png"
+  },
+  "mail": {
+    "from": "noreply@saaskickoff.com"
+  },
+  "tenants": {
+    "workspaces": {
+      "singular": "Workspace",
+      "plural": "Workspaces",
+      "description": "Workspaces are the main way to group users and resources together.",
+      "icon": "business-outline",
+      "defaultRole": "teamMember",
+      "roles": [
+        {
+          "value": "admin",
+          "label": "Admin",
+          "description": "Full access to all features and settings",
+          "icon": "shield-checkmark-outline"
+        },
+        {
+          "value": "teamMember",
+          "label": "Team Member",
+          "description": "Can read and write content",
+          "icon": "person-outline"
+        },
+        {
+          "value": "viewer",
+          "label": "Viewer",
+          "description": "Read-only access",
+          "icon": "eye-outline"
+        }
+      ],
+      "capabilities": {
+        "admin": [
+          "read",
+          "write",
+          "delete",
+          "workspace.edit",
+          "users.add",
+          "users.remove",
+          "users.edit",
+          "users.view",
+          "tasks.create",
+          "tasks.edit",
+          "tasks.delete",
+          "tasks.view"
+        ],
+        "teamMember": ["read", "write", "users.view", "tasks.create", "tasks.edit", "tasks.view"],
+        "viewer": ["read", "users.view", "tasks.view"]
+      }
+    }
+  }
+}

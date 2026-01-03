@@ -1,0 +1,15 @@
+{
+  "installCommand": "bun install --include=optional",
+  "buildCommand": "bun run build",
+  "outputDirectory": "dist/client",
+  "devCommand": "expo",
+  "cleanUrls": true,
+  "framework": null,
+  "functions": {
+    "api/index.js": {
+      "runtime": "@vercel/node@5.1.8",
+      "includeFiles": "dist/server/**"
+    }
+  },
+  "rewrites": [{ "source": "/(.*)", "destination": "/api/index" }]
+}

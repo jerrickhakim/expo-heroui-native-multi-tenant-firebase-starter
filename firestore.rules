@@ -1,0 +1,112 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ========================================
+    // Helper Functions
+    // ========================================
+
+    function userDocPath(collection, docId) {
+      return /databases/$(database)/documents/$(collection)/$(docId)/users/$(request.auth.uid);
+    }
+
+    function tenantDocPath(collection, docId) {
+      return /databases/$(database)/documents/$(collection)/$(docId);
+    }
+
+    // ----------------------------------------
+    // Roles
+    // ----------------------------------------
+    function hasRole(collection, docId, roles) {
+      let path = userDocPath(collection, docId);
+      return exists(path)
+        && (
+          get(path).data.role in roles
+          || request.auth.token.admin == true
+        );
+    }
+
+    // ----------------------------------------
+    // Capabilities
+    // ----------------------------------------
+    function hasCapability(collection, docId, capabilities) {
+      let path = userDocPath(collection, docId);
+      return exists(path)
+        && (
+          get(path).data.capabilities.hasAny(capabilities)
+          || request.auth.token.admin == true
+        );
+    }
+
+    // ----------------------------------------
+    // Role OR Capability
+    // ----------------------------------------
+    function hasRoleOrCapability(collection, docId, roles, capabilities) {
+      let path = userDocPath(collection, docId);
+      return exists(path)
+        && (
+          get(path).data.role in roles
+          || get(path).data.capabilities.hasAny(capabilities)
+          || request.auth.token.admin == true
+        );
+    }
+
+    // ----------------------------------------
+    // Tenant Membership
+    // ----------------------------------------
+    function isMember(collection, docId) {
+      let tenant = tenantDocPath(collection, docId);
+      return exists(tenant)
+        && get(tenant).data.users[request.auth.uid] == true;
+    }
+
+    // ========================================
+    // Workspaces
+    // ========================================
+
+    match /workspaces/{workspaceId} {
+      allow create: if false;
+      
+      allow read: if resource.data.users[request.auth.uid] == true
+                  || request.auth.token.admin == true;
+
+      allow update: if hasRole('workspaces', workspaceId, ['admin'])
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                      .hasOnly(['name', 'description', 'settings', 'updatedAt']);
+
+      allow delete: if false;
+
+      // ----------------------------------------
+      // Workspace Tasks
+      // ----------------------------------------
+      match /tasks/{taskId} {
+        allow create: if hasCapability('workspaces', workspaceId, ['write']);
+        allow read: if hasRole('workspaces', workspaceId, ['admin'])
+                    || hasCapability('workspaces', workspaceId, ['read']);
+        allow update: if hasCapability('workspaces', workspaceId, ['write']);
+        allow delete: if hasCapability('workspaces', workspaceId, ['delete']);
+      }
+    }
+
+    // ========================================
+    // User Profiles
+    // ========================================
+
+    match /users/{userId} {
+      allow create: if request.auth.uid == userId;
+      allow read: if request.auth.uid == userId;
+      allow update: if request.auth.uid == userId;
+      allow delete: if false;
+    }
+
+    // ========================================
+    // Notifications
+    // ========================================
+
+    match /notifications/{id} {
+      allow read: if request.auth.uid == resource.data.userId;
+      allow write: if false;
+    }
+  }
+}
