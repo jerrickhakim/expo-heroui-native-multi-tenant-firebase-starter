@@ -1,10 +1,11 @@
+import LoadingButton from "@/components/ui/LoadingButton";
 import { useHasCapability } from "@/stores/tenant";
 import type { UserRole } from "@/types/tenants";
 import { getDefaultCapabilities, getRoles } from "@/utils/tenantConfig";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useFormikContext } from "formik";
-import { Button, Spinner, TextField, useThemeColor } from "heroui-native";
+import { TextField, useThemeColor } from "heroui-native";
 import React, { useMemo } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native";
 
@@ -20,7 +21,7 @@ export default function NewUserIndexScreen() {
   const accentColor = useThemeColor("accent");
   const foregroundColor = useThemeColor("foreground");
 
-  const { values, errors, touched, isSubmitting, handleChange, handleBlur, handleSubmit, setFieldValue } = useFormikContext<FormValues>();
+  const { values, errors, touched, isSubmitting, handleChange, handleBlur, handleSubmit, setFieldValue, validateForm, setTouched } = useFormikContext<FormValues>();
 
   // Check for users.add capability (config-driven)
   const canInvite = useHasCapability(["users.add"]);
@@ -150,27 +151,30 @@ export default function NewUserIndexScreen() {
             </View>
 
             {/* Submit Button */}
-            <Button
-              size="lg"
-              className="mt-4 flex-row items-center justify-center"
-              isDisabled={isSubmitting}
-              onPress={() => handleSubmit()}
+            <LoadingButton
+              label="Add User"
+              loadingLabel="Adding User..."
+              isLoading={isSubmitting}
+              onPress={async () => {
+                const errors = await validateForm(values);
+                setTouched({ email: true, role: true, capabilities: true });
+                if (Object.keys(errors).length === 0) {
+                  handleSubmit();
+                }
+              }}
               variant="primary"
-            >
-              <Button.Label>{isSubmitting ? "Adding User..." : "Add User"}</Button.Label>
-              {isSubmitting && <Spinner color={foregroundColor} />}
-            </Button>
+              size="lg"
+            />
 
             {/* Cancel Button */}
-            <Button
-              size="lg"
-              variant="secondary"
-              className="flex-row items-center justify-center"
+            <LoadingButton
+              label="Cancel"
+              isLoading={false}
               isDisabled={isSubmitting}
               onPress={() => router.back()}
-            >
-              <Button.Label>Cancel</Button.Label>
-            </Button>
+              variant="secondary"
+              size="lg"
+            />
           </View>
         </View>
       </ScrollView>

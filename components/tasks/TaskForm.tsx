@@ -1,8 +1,9 @@
+import LoadingButton from "@/components/ui/LoadingButton";
 import useAlert from "@/hooks/useAlert";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Formik } from "formik";
-import { Button, Checkbox, FormField, Spinner, TextField, useThemeColor } from "heroui-native";
+import { Checkbox, FormField, TextField, useThemeColor } from "heroui-native";
 import React from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from "react-native";
 import { z } from "zod";
@@ -44,7 +45,6 @@ const DEFAULT_VALUES: TaskFormValues = {
 
 export default function TaskForm({ mode, initialValues = DEFAULT_VALUES, onSubmit }: TaskFormProps) {
   const mutedColor = useThemeColor("muted");
-  const themeColorForeground = useThemeColor("foreground");
   const { showAlert } = useAlert();
 
   const isEditMode = mode === "edit";
@@ -77,7 +77,7 @@ export default function TaskForm({ mode, initialValues = DEFAULT_VALUES, onSubmi
             onSubmit={handleSubmit}
             enableReinitialize
           >
-            {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isSubmitting, setFieldValue }) => (
+            {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isSubmitting, setFieldValue, validateForm, setTouched }) => (
               <View className="gap-5">
                 {/* Title Field */}
                 <TextField isRequired isInvalid={!!(touched.title && errors.title)}>
@@ -138,16 +138,20 @@ export default function TaskForm({ mode, initialValues = DEFAULT_VALUES, onSubmi
                 </View>
 
                 {/* Submit Button */}
-                <Button
-                  size="lg"
-                  className="mt-4 flex-row items-center justify-center"
-                  isDisabled={isSubmitting}
-                  onPress={() => handleSubmit()}
+                <LoadingButton
+                  label={submitButtonLabel}
+                  loadingLabel={submittingLabel}
+                  isLoading={isSubmitting}
+                  onPress={async () => {
+                    const errors = await validateForm(values);
+                    setTouched({ title: true, description: true, status: true });
+                    if (Object.keys(errors).length === 0) {
+                      handleSubmit();
+                    }
+                  }}
                   variant="primary"
-                >
-                  <Button.Label>{isSubmitting ? submittingLabel : submitButtonLabel}</Button.Label>
-                  {isSubmitting && <Spinner color={themeColorForeground} />}
-                </Button>
+                  size="lg"
+                />
               </View>
             )}
           </Formik>

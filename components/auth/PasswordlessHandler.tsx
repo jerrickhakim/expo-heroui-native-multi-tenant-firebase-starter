@@ -1,10 +1,11 @@
+import LoadingButton from "@/components/ui/LoadingButton";
 import useAlert from "@/hooks/useAlert";
 import { AuthError, checkIsSignInWithEmailLink, signInWithMagicLink } from "@/integrations/auth";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Link, router, useLocalSearchParams } from "expo-router";
 import { Formik } from "formik";
-import { Button, Spinner, TextField, useThemeColor } from "heroui-native";
+import { Spinner, TextField, useThemeColor } from "heroui-native";
 import React, { useEffect, useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { z } from "zod";
@@ -24,7 +25,6 @@ export default function PasswordlessHandler({ oobCode }: PasswordlessHandlerProp
   const params = useLocalSearchParams();
   const mutedColor = useThemeColor("muted");
   const accentColor = useThemeColor("accent");
-  const themeColorForeground = useThemeColor("foreground");
   const { showAlert } = useAlert();
 
   const [loading, setLoading] = useState(true);
@@ -118,7 +118,7 @@ export default function PasswordlessHandler({ oobCode }: PasswordlessHandlerProp
 
             {/* Form */}
             <Formik initialValues={{ email: "" }} validationSchema={toFormikValidationSchema(EmailSchema)} onSubmit={handleEmailSubmit}>
-              {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isSubmitting }) => (
+              {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isSubmitting, validateForm, setTouched }) => (
                 <View className="gap-5">
                   {/* Email Field */}
                   <TextField isRequired isInvalid={!!(touched.email && errors.email)}>
@@ -140,16 +140,20 @@ export default function PasswordlessHandler({ oobCode }: PasswordlessHandlerProp
                   </TextField>
 
                   {/* Submit Button */}
-                  <Button
-                    size="lg"
-                    className="mt-4 flex-row items-center justify-center"
-                    isDisabled={isSubmitting}
-                    onPress={() => handleSubmit()}
+                  <LoadingButton
+                    label="Sign In"
+                    loadingLabel="Signing In..."
+                    isLoading={isSubmitting}
+                    onPress={async () => {
+                      const errors = await validateForm(values);
+                      setTouched({ email: true });
+                      if (Object.keys(errors).length === 0) {
+                        handleSubmit();
+                      }
+                    }}
                     variant="primary"
-                  >
-                    <Button.Label>{isSubmitting ? "Signing In..." : "Sign In"}</Button.Label>
-                    {isSubmitting && <Spinner color={themeColorForeground}></Spinner>}
-                  </Button>
+                    size="lg"
+                  />
 
                   {/* Back to Login Link */}
                   <View className="flex-row justify-center items-center mt-6">

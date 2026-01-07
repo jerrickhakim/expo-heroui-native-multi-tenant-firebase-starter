@@ -45,7 +45,7 @@ export default function UpdateEmailScreen() {
             onSubmit={handleUpdate}
             enableReinitialize
           >
-            {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isSubmitting }) => (
+            {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isSubmitting, validateForm, setTouched }) => (
               <View className="flex-1 justify-between">
                 {/* Email Field */}
                 <TextField isRequired isInvalid={!!(touched.email && errors.email)}>
@@ -72,7 +72,13 @@ export default function UpdateEmailScreen() {
                   loadingLabel="Updating..."
                   isLoading={isSubmitting}
                   isDisabled={values.email === initialEmail}
-                  onPress={() => handleSubmit()}
+                  onPress={async () => {
+                    const errors = await validateForm(values);
+                    setTouched({ email: true });
+                    if (Object.keys(errors).length === 0) {
+                      handleSubmit();
+                    }
+                  }}
                   variant="primary"
                   size="lg"
                 />

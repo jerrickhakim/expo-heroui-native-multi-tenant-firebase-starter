@@ -1,9 +1,10 @@
+import LoadingButton from "@/components/ui/LoadingButton";
 import useAlert from "@/hooks/useAlert";
 import { AuthError, resetPassword } from "@/integrations/auth";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, router, useLocalSearchParams } from "expo-router";
 import { Formik } from "formik";
-import { Button, Spinner, TextField, useThemeColor } from "heroui-native";
+import { TextField, useThemeColor } from "heroui-native";
 import React from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { z } from "zod";
@@ -30,7 +31,6 @@ export default function ForgotPasswordScreen() {
       setSubmitting(false);
     }
   };
-  const themeColorForeground = useThemeColor("foreground");
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1 bg-background">
@@ -42,7 +42,7 @@ export default function ForgotPasswordScreen() {
             validationSchema={toFormikValidationSchema(ForgotPasswordSchema)}
             onSubmit={handleResetPassword}
           >
-            {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isSubmitting }) => (
+            {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isSubmitting, validateForm, setTouched }) => (
               <View className="gap-5">
                 {/* Email Field */}
                 <TextField isRequired isInvalid={!!(touched.email && errors.email)}>
@@ -64,16 +64,20 @@ export default function ForgotPasswordScreen() {
                 </TextField>
 
                 {/* Submit Button */}
-                <Button
-                  size="lg"
-                  className="mt-4 flex-row items-center justify-center"
-                  isDisabled={isSubmitting}
-                  onPress={() => handleSubmit()}
+                <LoadingButton
+                  label="Send Reset Link"
+                  loadingLabel="Sending..."
+                  isLoading={isSubmitting}
+                  onPress={async () => {
+                    const errors = await validateForm(values);
+                    setTouched({ email: true });
+                    if (Object.keys(errors).length === 0) {
+                      handleSubmit();
+                    }
+                  }}
                   variant="primary"
-                >
-                  <Button.Label>{isSubmitting ? "Sending..." : "Send Reset Link"}</Button.Label>
-                  {isSubmitting && <Spinner color={themeColorForeground}></Spinner>}
-                </Button>
+                  size="lg"
+                />
 
                 {/* Back to Login Link */}
                 <View className="flex-row justify-center items-center mt-6">

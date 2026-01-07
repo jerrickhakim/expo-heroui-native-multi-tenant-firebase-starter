@@ -11,8 +11,7 @@ interface AuthContextType {}
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AuthProvider = ({ children }: PropsWithChildren): React.ReactElement => {
-  const { user, loading, setUser, setLoading, setIsAdmin, setTenantData, setAllTenantsLoading, setBatchTenantData, resetAuth } =
-    useAuthStore();
+  const { user, setUser, setLoading, setIsAdmin, setTenantData, setAllTenantsLoading, setBatchTenantData, resetAuth } = useAuthStore();
 
   const unsubscribersRef = useRef<(() => void)[]>([]);
 

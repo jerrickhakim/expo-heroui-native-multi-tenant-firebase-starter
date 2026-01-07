@@ -1,9 +1,10 @@
+import LoadingButton from "@/components/ui/LoadingButton";
 import useAlert from "@/hooks/useAlert";
 import { AuthError, login } from "@/integrations/auth";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, router } from "expo-router";
 import { Formik } from "formik";
-import { Button, Spinner, TextField, useThemeColor } from "heroui-native";
+import { TextField, useThemeColor } from "heroui-native";
 import React, { useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { z } from "zod";
@@ -34,7 +35,6 @@ export default function LoginScreen() {
       setSubmitting(false);
     }
   };
-  const themeColorForeground = useThemeColor("foreground");
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1 bg-background">
@@ -42,7 +42,7 @@ export default function LoginScreen() {
         <View className="flex-1 justify-center px-6 py-12 w-full max-w-md mx-auto">
           {/* Form */}
           <Formik initialValues={{ email: "", password: "" }} validate={toFormikValidate(LoginSchema)} onSubmit={handleLogin}>
-            {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isSubmitting }) => (
+            {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isSubmitting, validateForm, setTouched }) => (
               <View className="gap-5">
                 {/* Email Field */}
                 <TextField isRequired isInvalid={!!(touched.email && errors.email)}>
@@ -95,16 +95,20 @@ export default function LoginScreen() {
                 </View>
 
                 {/* Submit Button */}
-                <Button
-                  size="lg"
-                  className="mt-4 flex-row items-center justify-center"
-                  isDisabled={isSubmitting}
-                  onPress={() => handleSubmit()}
+                <LoadingButton
+                  label="Sign In"
+                  loadingLabel="Signing In..."
+                  isLoading={isSubmitting}
+                  onPress={async () => {
+                    const errors = await validateForm(values);
+                    setTouched({ email: true, password: true });
+                    if (Object.keys(errors).length === 0) {
+                      handleSubmit();
+                    }
+                  }}
                   variant="primary"
-                >
-                  <Button.Label>{isSubmitting ? "Signing In..." : "Sign In"}</Button.Label>
-                  {isSubmitting && <Spinner color={themeColorForeground}></Spinner>}
-                </Button>
+                  size="lg"
+                />
 
                 {/* Sign Up Link */}
                 <View className="flex-row justify-center items-center mt-6">

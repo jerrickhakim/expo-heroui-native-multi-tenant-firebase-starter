@@ -1,9 +1,10 @@
+import LoadingButton from "@/components/ui/LoadingButton";
 import useAlert from "@/hooks/useAlert";
 import { AuthError, confirmPasswordResetWithCode } from "@/integrations/auth";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, router } from "expo-router";
 import { Formik } from "formik";
-import { Button, Spinner, TextField, useThemeColor } from "heroui-native";
+import { TextField, useThemeColor } from "heroui-native";
 import React, { useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { z } from "zod";
@@ -25,7 +26,6 @@ interface ResetPasswordFormProps {
 
 export default function ResetPasswordForm({ oobCode }: ResetPasswordFormProps) {
   const mutedColor = useThemeColor("muted");
-  const themeColorForeground = useThemeColor("foreground");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { showAlert } = useAlert();
@@ -79,7 +79,7 @@ export default function ResetPasswordForm({ oobCode }: ResetPasswordFormProps) {
             validationSchema={toFormikValidationSchema(ResetPasswordSchema)}
             onSubmit={handleResetPassword}
           >
-            {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isSubmitting }) => (
+            {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isSubmitting, validateForm, setTouched }) => (
               <View className="gap-5">
                 {/* New Password Field */}
                 <TextField isRequired isInvalid={!!(touched.newPassword && errors.newPassword)}>
@@ -130,16 +130,20 @@ export default function ResetPasswordForm({ oobCode }: ResetPasswordFormProps) {
                 </TextField>
 
                 {/* Submit Button */}
-                <Button
-                  size="lg"
-                  className="mt-4 flex-row items-center justify-center"
-                  isDisabled={isSubmitting}
-                  onPress={() => handleSubmit()}
+                <LoadingButton
+                  label="Reset Password"
+                  loadingLabel="Resetting..."
+                  isLoading={isSubmitting}
+                  onPress={async () => {
+                    const errors = await validateForm(values);
+                    setTouched({ newPassword: true, confirmPassword: true });
+                    if (Object.keys(errors).length === 0) {
+                      handleSubmit();
+                    }
+                  }}
                   variant="primary"
-                >
-                  <Button.Label>{isSubmitting ? "Resetting..." : "Reset Password"}</Button.Label>
-                  {isSubmitting && <Spinner color={themeColorForeground}></Spinner>}
-                </Button>
+                  size="lg"
+                />
 
                 {/* Back to Login Link */}
                 <View className="flex-row justify-center items-center mt-6">

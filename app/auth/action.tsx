@@ -10,7 +10,7 @@ export default function Action() {
 
   // Redirect to auth if no mode is provided
   if (!mode) {
-    return <Redirect href="/auth" />;
+    return <Redirect href="/" />;
   }
 
   return (

@@ -1,3 +1,4 @@
+import LoadingButton from "@/components/ui/LoadingButton";
 import { useAuth } from "@/stores/auth";
 import { useHasRole } from "@/stores/tenant";
 import type { TenantUserWithProfile, UserRole } from "@/types/tenants";
@@ -6,7 +7,7 @@ import { formatCapabilityName, getDefaultCapabilities, getRoles } from "@/utils/
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useFormikContext } from "formik";
-import { Avatar, Button, Card, Spinner, useThemeColor } from "heroui-native";
+import { Avatar, Card, useThemeColor } from "heroui-native";
 import React, { useMemo } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native";
 
@@ -24,7 +25,7 @@ export default function EditUserIndexScreen() {
   const accentColor = useThemeColor("accent");
   const foregroundColor = useThemeColor("foreground");
 
-  const { values, isSubmitting, handleSubmit, setFieldValue } = useFormikContext<FormValues>();
+  const { values, isSubmitting, handleSubmit, setFieldValue, validateForm, setTouched } = useFormikContext<FormValues>();
 
   const userDetail = values._userDetail;
 
@@ -134,16 +135,20 @@ export default function EditUserIndexScreen() {
               </Card>
 
               {/* Submit Button */}
-              <Button
-                size="lg"
-                className="mt-4 flex-row items-center justify-center"
-                isDisabled={isSubmitting}
-                onPress={() => handleSubmit()}
+              <LoadingButton
+                label="Save Changes"
+                loadingLabel="Saving..."
+                isLoading={isSubmitting}
+                onPress={async () => {
+                  const errors = await validateForm(values);
+                  setTouched({ role: true, capabilities: true });
+                  if (Object.keys(errors).length === 0) {
+                    handleSubmit();
+                  }
+                }}
                 variant="primary"
-              >
-                <Button.Label>{isSubmitting ? "Saving..." : "Save Changes"}</Button.Label>
-                {isSubmitting && <Spinner color={foregroundColor} />}
-              </Button>
+                size="lg"
+              />
 
               {/* Cancel Button */}
               <Button

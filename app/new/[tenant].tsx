@@ -1,9 +1,10 @@
+import LoadingButton from "@/components/ui/LoadingButton";
 import useAlert from "@/hooks/useAlert";
 import { auth } from "@/integrations/firebase.client";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { Formik } from "formik";
-import { Button, Spinner, TextField, useThemeColor } from "heroui-native";
+import { TextField, useThemeColor } from "heroui-native";
 import React from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 import { z } from "zod";
@@ -23,7 +24,6 @@ export default function NewTenantScreen() {
 
   const mutedColor = useThemeColor("muted");
   const { showAlert } = useAlert();
-  const themeColorForeground = useThemeColor("foreground");
 
   const handleCreate = async (values: { name: string }, { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }) => {
     try {
@@ -65,7 +65,7 @@ export default function NewTenantScreen() {
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <View className="flex-1 justify-between px-6 py-12 w-full max-w-md mx-auto">
           <Formik initialValues={{ name: "" }} validationSchema={toFormikValidationSchema(NewTenantSchema)} onSubmit={handleCreate}>
-            {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isSubmitting }) => (
+            {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isSubmitting, validateForm, setTouched }) => (
               <View className="flex-1 justify-between">
                 {/* Name Field */}
                 <TextField isRequired isInvalid={!!(touched.name && errors.name)}>
@@ -85,16 +85,20 @@ export default function NewTenantScreen() {
                 </TextField>
 
                 {/* Submit Button */}
-                <Button
-                  size="lg"
-                  className="flex-row items-center justify-center"
-                  isDisabled={isSubmitting}
-                  onPress={() => handleSubmit()}
+                <LoadingButton
+                  label={`Create ${singular}`}
+                  loadingLabel="Creating..."
+                  isLoading={isSubmitting}
+                  onPress={async () => {
+                    const errors = await validateForm(values);
+                    setTouched({ name: true });
+                    if (Object.keys(errors).length === 0) {
+                      handleSubmit();
+                    }
+                  }}
                   variant="primary"
-                >
-                  <Button.Label>{isSubmitting ? "Creating..." : `Create ${singular}`}</Button.Label>
-                  {isSubmitting && <Spinner color={themeColorForeground}></Spinner>}
-                </Button>
+                  size="lg"
+                />
               </View>
             )}
           </Formik>

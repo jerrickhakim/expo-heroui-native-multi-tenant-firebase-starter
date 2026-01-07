@@ -181,7 +181,12 @@ export default function ProfileAvatar({ size = 96, editable = true, onAvatarChan
       {/* Camera Modal */}
       <Modal visible={showCamera} animationType="slide" onRequestClose={() => setShowCamera(false)}>
         <View className="flex-1 bg-black">
-          <CameraView ref={cameraRef} style={{ flex: 1 }} facing={facing} mirror={facing === "front"}>
+          <CameraView
+            ref={cameraRef as unknown as React.RefObject<CameraView>}
+            style={{ flex: 1 }}
+            facing={facing}
+            mirror={facing === "front"}
+          >
             {/* Top controls */}
             <View
               style={{ paddingTop: insets.top + 8 }}

@@ -1,3 +1,4 @@
+import LoadingButton from "@/components/ui/LoadingButton";
 import useAlert from "@/hooks/useAlert";
 import { db } from "@/integrations/firebase.client";
 import { useTenant, useTenantConfig } from "@/stores/tenant";
@@ -5,7 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { doc, updateDoc } from "firebase/firestore";
 import { Formik } from "formik";
-import { Button, Spinner, TextField, useThemeColor } from "heroui-native";
+import { TextField, useThemeColor } from "heroui-native";
 import React, { useEffect, useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 import { z } from "zod";
@@ -23,7 +24,6 @@ export default function UpdateNameScreen() {
   const icon = (config?.icon ?? "business-outline") as keyof typeof Ionicons.glyphMap;
 
   const mutedColor = useThemeColor("muted");
-  const themeColorForeground = useThemeColor("foreground");
   const { showAlert } = useAlert();
 
   // Get initial name from tenant store
@@ -55,7 +55,7 @@ export default function UpdateNameScreen() {
   if (!config || !tenant) {
     return (
       <View className="flex-1 bg-background items-center justify-center">
-        <Spinner color={themeColorForeground} />
+        <Text className="text-muted">Loading...</Text>
       </View>
     );
   }
@@ -70,7 +70,7 @@ export default function UpdateNameScreen() {
             onSubmit={handleUpdate}
             enableReinitialize
           >
-            {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isSubmitting }) => (
+            {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isSubmitting, validateForm, setTouched }) => (
               <View className="flex-1 justify-between">
                 {/* Name Field */}
                 <TextField isRequired isInvalid={!!(touched.name && errors.name)}>
@@ -90,16 +90,21 @@ export default function UpdateNameScreen() {
                 </TextField>
 
                 {/* Submit Button */}
-                <Button
-                  size="lg"
-                  className="flex-row items-center justify-center"
-                  isDisabled={isSubmitting || values.name === initialName}
-                  onPress={() => handleSubmit()}
+                <LoadingButton
+                  label="Update Name"
+                  loadingLabel="Updating..."
+                  isLoading={isSubmitting}
+                  isDisabled={values.name === initialName}
+                  onPress={async () => {
+                    const errors = await validateForm(values);
+                    setTouched({ name: true });
+                    if (Object.keys(errors).length === 0) {
+                      handleSubmit();
+                    }
+                  }}
                   variant="primary"
-                >
-                  <Button.Label>{isSubmitting ? "Updating..." : "Update Name"}</Button.Label>
-                  {isSubmitting && <Spinner color={themeColorForeground} />}
-                </Button>
+                  size="lg"
+                />
               </View>
             )}
           </Formik>
